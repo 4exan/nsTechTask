@@ -12,12 +12,8 @@ import ua.dev.techtask.repository.BookRepository;
 @Service
 public class BookService {
     
-    private final BookRepository bookRepository;
-
     @Autowired
-    public BookService(BookRepository bookRepository){
-        this.bookRepository = bookRepository;
-    }
+    private BookRepository bookRepository;
     
     //TODO impl search logic
     public List<Book> getAllBooks(){
@@ -41,8 +37,8 @@ public class BookService {
     }
 
     //TODO impl deletion logic
-    public void deleteBook(BookDto req){
-        removeBookFromDB(req.getId());
+    public void deleteBook(long id){
+        removeBookFromDB(id);
     }
 
     private void saveBookToDB(Book book){
