@@ -2,6 +2,8 @@ package ua.dev.techtask.entity;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -19,9 +21,11 @@ public class Borrow {
   private long id;
   @ManyToOne
   @JoinColumn(name = "member_id")
+  @JsonIgnore
   private Member member;
   @ManyToOne
   @JoinColumn(name = "book_id")
+  @JsonIgnore
   private Book book;
   private LocalDateTime borrowDate;
   private LocalDateTime returnDate;
