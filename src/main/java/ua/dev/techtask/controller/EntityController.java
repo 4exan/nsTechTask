@@ -21,7 +21,7 @@ import ua.dev.techtask.service.MemberService;
 
 @RestController
 @RequestMapping("/api")
-public class Controller {
+public class EntityController {
 
   @Autowired
   private BookService bookService;
