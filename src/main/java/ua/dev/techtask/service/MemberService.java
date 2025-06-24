@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import ua.dev.techtask.dto.MemberDto;
 import ua.dev.techtask.entity.Member;
 import ua.dev.techtask.exception.NoSuchMemberException;
+import ua.dev.techtask.repository.BorrowRepository;
 import ua.dev.techtask.repository.MemberRepository;
 
 @Service
@@ -16,6 +17,8 @@ public class MemberService {
 
   @Autowired
   private MemberRepository memberRepository;
+  @Autowired
+  private BorrowRepository borrowRepository;
 
   public List<Member> getAllMembers() {
     return memberRepository.findAll();
@@ -39,9 +42,14 @@ public class MemberService {
     saveMemberToDB(member);
   }
 
-  // TODO impl deletion logic
+  // TODO test
   public void deleteMember(long id) {
-    memberRepository.deleteById(id);
+    int borrowCount = borrowRepository.countByMemberIdAndReturnDateIsNull(id);
+    if (borrowCount >= 1) {
+      throw new IllegalStateException("Cannot delete member with borrowed books");
+    } else {
+      memberRepository.deleteById(id);
+    }
   }
 
   private void saveMemberToDB(Member member) {

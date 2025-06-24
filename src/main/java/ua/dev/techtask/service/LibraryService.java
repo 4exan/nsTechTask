@@ -1,6 +1,7 @@
 package ua.dev.techtask.service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,7 +38,8 @@ public class LibraryService {
       throw new IllegalStateException("No available book to borrow");
     }
     Member member = memberRepository.findById(req.getMemberId()).orElseThrow(() -> new NoSuchMemberException());
-    if (member.getBorrows().size() >= borrowLimit) {
+    int activeBorrows = borrowRepository.countByMemberIdAndReturnDateIsNull(member.getId());
+    if (activeBorrows >= borrowLimit) {
       throw new IllegalStateException("Cannot borrow more books");
     }
 
@@ -52,17 +54,13 @@ public class LibraryService {
   }
 
   @Transactional
-  public void returnBook(Long borrowId) {
-    Borrow borrow = borrowRepository.findById(borrowId).orElseThrow(() -> new NoSuchBorrowException());
-    if (borrow.getReturnDate() != null) {
-      throw new IllegalStateException("Book has already been returned");
-    }
-    borrow.setReturnDate(LocalDateTime.now());
-    borrowRepository.save(borrow);
-
+  public void returnBook(BorrowDto req) {
+    Borrow borrow = borrowRepository.findByMemberIdAndBookIdAndReturnDateIsNull(req.getMemberId(), req.getBookId())
+        .orElseThrow(() -> new NoSuchBorrowException());
     Book book = borrow.getBook();
     book.setAmount(book.getAmount() + 1);
     bookRepository.save(book);
+    borrow.setReturnDate(LocalDateTime.now());
   }
 
 }
