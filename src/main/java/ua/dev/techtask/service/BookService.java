@@ -1,6 +1,7 @@
 package ua.dev.techtask.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,11 +21,18 @@ public class BookService {
         return bookRepository.findAll();
     }
 
-    //TODO impl creation logic
     public void createBook(BookDto req){
-        Book book = new Book();
-        book.setTitle(req.getTitle());
-        book.setAuthor(req.getAuthor());
+        Book book;
+        Optional<Book> existing = bookRepository.findByTitleAndAuthor(req.getTitle(), req.getAuthor());
+        if(existing.isPresent()){
+            book = existing.get();
+            book.setAmount(book.getAmount() + 1);
+        }else{
+            book = new Book();
+            book.setTitle(req.getTitle());
+            book.setAuthor(req.getAuthor());
+            book.setAmount(1);
+        }
         saveBookToDB(book);
     }
 
@@ -47,6 +55,10 @@ public class BookService {
         }catch(Exception e){
             throw new RuntimeException("Error occured while saving book to DB ->", e);
         }
+    }
+
+    private Book getBookById(long id){
+        return bookRepository.findById(id).orElseThrow(() -> new RuntimeException("No such Book in DB"));
     }
 
     private void removeBookFromDB(long id){
