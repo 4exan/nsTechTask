@@ -36,8 +36,8 @@ public class MemberService {
     saveMemberToDB(member);
   }
 
-  public void editMember(MemberDto req) {
-    Member member = memberRepository.findById(req.getId()).orElseThrow(() -> new NoSuchMemberException());
+  public void editMember(Long memberId, MemberDto req) {
+    Member member = memberRepository.findById(memberId).orElseThrow(() -> new NoSuchMemberException());
     member.setName(req.getName());
     saveMemberToDB(member);
   }

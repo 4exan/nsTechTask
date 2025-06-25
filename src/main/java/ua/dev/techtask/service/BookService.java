@@ -43,8 +43,8 @@ public class BookService {
     saveBookToDB(book);
   }
 
-  public void editBook(BookDto req) {
-    Book book = bookRepository.findById(req.getId()).orElseThrow(() -> new RuntimeException("No such Book"));
+  public void editBook(long bookId, BookDto req) {
+    Book book = bookRepository.findById(bookId).orElseThrow(() -> new RuntimeException("No such Book"));
     book.setTitle(req.getTitle());
     book.setAuthor(req.getAuthor());
     book.setAmount(req.getAmount());
