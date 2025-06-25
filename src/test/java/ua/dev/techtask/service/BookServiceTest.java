@@ -12,11 +12,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import net.bytebuddy.asm.Advice.Argument;
 import ua.dev.techtask.dto.BookDto;
-import ua.dev.techtask.dto.BorrowDto;
 import ua.dev.techtask.entity.Book;
-import ua.dev.techtask.entity.Borrow;
 import ua.dev.techtask.repository.BookRepository;
 import ua.dev.techtask.repository.BorrowRepository;
 
@@ -105,16 +102,15 @@ public class BookServiceTest {
   @Test
   void testEditBook() {
     BookDto req = new BookDto("New Title", "New Author", 5);
-    req.setId(2);
     Book savedBook = new Book();
     savedBook.setId(2);
     savedBook.setTitle("Old Title");
     savedBook.setAuthor("Old Author");
     savedBook.setAmount(3);
 
-    Mockito.when(bookRepository.findById(req.getId())).thenReturn(Optional.of(savedBook));
+    Mockito.when(bookRepository.findById(2L)).thenReturn(Optional.of(savedBook));
 
-    bookService.editBook(req);
+    bookService.editBook(2, req);
     ArgumentCaptor<Book> captor = ArgumentCaptor.forClass(Book.class);
     Mockito.verify(bookRepository).save(captor.capture());
 
