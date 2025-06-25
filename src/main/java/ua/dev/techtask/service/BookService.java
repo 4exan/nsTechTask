@@ -34,7 +34,11 @@ public class BookService {
       book = new Book();
       book.setTitle(req.getTitle());
       book.setAuthor(req.getAuthor());
-      book.setAmount(1);
+      if (req.getAmount() != 0) {
+        book.setAmount(req.getAmount());
+      } else {
+        book.setAmount(1);
+      }
     }
     saveBookToDB(book);
   }
