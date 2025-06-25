@@ -3,7 +3,9 @@ package ua.dev.techtask.service;
 import java.util.List;
 import java.util.Optional;
 
-import org.assertj.core.api.Assertions;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -30,95 +32,110 @@ public class BookServiceTest {
   private BookService bookService;
 
   @Test
-  void testGetAllBooks() {
+  void getAllBooks_returnListOfBooks() {
 
-    Book book1 = new Book();
-    book1.setId(1);
-    book1.setTitle("Book test title");
-    book1.setAuthor("Book Author");
-    book1.setAmount(10);
+    List<Book> books = List.of(new Book(), new Book());
 
-    Book book2 = new Book();
-    book2.setId(2);
-    book2.setTitle("Second book test title");
-    book2.setAuthor("Book Author");
-    book2.setAmount(10);
+    Mockito.when(bookRepository.findAll()).thenReturn(books);
 
-    Mockito.when(bookRepository.findAll()).thenReturn(List.of(book1, book2));
+    List<Book> result = bookService.getAllBooks();
 
-    List<Book> books = bookService.getAllBooks();
-    Assertions.assertThat(books.getFirst().getTitle()).isEqualTo("Book test title");
-    Assertions.assertThat(books.getLast().getId()).isEqualTo(2);
+    Assertions.assertEquals(2, result.size());
   }
 
   @Test
-  void testCreateBook_whenBookExist_incrementAmount() {
-    Book existinBook = new Book();
-    existinBook.setTitle("Title");
-    existinBook.setAuthor("Book Author");
-    existinBook.setAmount(2);
+  void createBook_whenBookExists_shouldIncrementAmount() {
+    Book existingBook = new Book();
+    existingBook.setAmount(2);
+    existingBook.setTitle("Title");
+    existingBook.setAuthor("Author");
 
-    BookDto req = new BookDto("Title", "Bokk Author", 0);
+    BookDto dto = new BookDto("Title", "Author", 0);
 
-    Mockito.when(bookRepository.findByTitleAndAuthor("Title", "Book Author")).thenReturn(Optional.of(existinBook));
-    bookService.createBook(req);
+    Mockito.when(bookRepository.findByTitleAndAuthor("Title", "Author"))
+        .thenReturn(Optional.of(existingBook));
+
+    bookService.createBook(dto);
+
+    Assertions.assertEquals(3, existingBook.getAmount());
+    Mockito.verify(bookRepository).save(existingBook);
+  }
+
+  @Test
+  void createBook_whenBookNotExists_shouldCreateNewWithDefaultAmount() {
+    BookDto dto = new BookDto("New Title", "New Author", 0);
+
+    Mockito.when(bookRepository.findByTitleAndAuthor("New Title", "New Author"))
+        .thenReturn(Optional.empty());
 
     ArgumentCaptor<Book> captor = ArgumentCaptor.forClass(Book.class);
-    Mockito.verify(bookRepository.save(captor.capture()));
 
+    bookService.createBook(dto);
+
+    Mockito.verify(bookRepository).save(captor.capture());
     Book savedBook = captor.getValue();
-    Assertions.assertThat(savedBook.getAmount()).isEqualTo(3);
-    Assertions.assertThat(savedBook.getTitle()).isEqualTo("Title");
+
+    Assertions.assertEquals("New Title", savedBook.getTitle());
+    Assertions.assertEquals("New Author", savedBook.getAuthor());
+    Assertions.assertEquals(1, savedBook.getAmount());
   }
 
   @Test
-  void testCreateBook_whenBookDoesNotExist_createNewWithGivenAmount() {
-    BookDto req = new BookDto("New Title", "New Author", 5);
-    Mockito.when(bookRepository.findByTitleAndAuthor("New Title", "New Author")).thenReturn(Optional.empty());
+  void createBook_whenAmountProvided_shouldUseProvidedAmount() {
+    BookDto dto = new BookDto("Another", "Author", 5);
 
-    bookService.createBook(req);
+    Mockito.when(bookRepository.findByTitleAndAuthor("Another", "Author"))
+        .thenReturn(Optional.empty());
+
+    bookService.createBook(dto);
 
     ArgumentCaptor<Book> captor = ArgumentCaptor.forClass(Book.class);
     Mockito.verify(bookRepository).save(captor.capture());
-
-    Book savedBook = captor.getValue();
-    Assertions.assertThat(savedBook.getTitle()).isEqualTo("New Title");
-    Assertions.assertThat(savedBook.getAuthor()).isEqualTo("New Author");
-    Assertions.assertThat(savedBook.getAmount()).isEqualTo(5);
+    Assertions.assertEquals(5, captor.getValue().getAmount());
   }
 
   @Test
-  void testCreateBook_whenBookDoesNotExistAndAmountIsZero_setAmountTo1() {
-    BookDto req = new BookDto("Zero Book", "Some Author", 0);
-    Mockito.when(bookRepository.findByTitleAndAuthor("Zero book", "Some Author")).thenReturn(Optional.empty());
-    bookService.createBook(req);
-    ArgumentCaptor<Book> captor = ArgumentCaptor.forClass(Book.class);
-    Mockito.verify(bookRepository).save(captor.capture());
+  void editBook_shouldUpdateBookFields() {
+    Book existing = new Book();
+    existing.setId(1L);
+    BookDto dto = new BookDto("Updated", "Updated Author", 7);
 
-    Book savedBook = captor.getValue();
-    Assertions.assertThat(savedBook.getAmount()).isEqualTo(1);
+    Mockito.when(bookRepository.findById(1L)).thenReturn(Optional.of(existing));
+
+    bookService.editBook(1L, dto);
+
+    Assertions.assertEquals("Updated", existing.getTitle());
+    Assertions.assertEquals("Updated Author", existing.getAuthor());
+    Assertions.assertEquals(7, existing.getAmount());
+    Mockito.verify(bookRepository).save(existing);
   }
 
   @Test
-  void testEditBook() {
-    BookDto req = new BookDto("New Title", "New Author", 5);
-    Book savedBook = new Book();
-    savedBook.setId(2);
-    savedBook.setTitle("Old Title");
-    savedBook.setAuthor("Old Author");
-    savedBook.setAmount(3);
+  void editBook_whenNotFound_shouldThrowException() {
+    Mockito.when(bookRepository.findById(100L)).thenReturn(Optional.empty());
 
-    Mockito.when(bookRepository.findById(2L)).thenReturn(Optional.of(savedBook));
+    BookDto dto = new BookDto("Title", "Author", 3);
 
-    bookService.editBook(2, req);
-    ArgumentCaptor<Book> captor = ArgumentCaptor.forClass(Book.class);
-    Mockito.verify(bookRepository).save(captor.capture());
+    Assertions.assertThrows(RuntimeException.class,
+        () -> bookService.editBook(100L, dto));
+  }
 
-    Book editedBook = captor.getValue();
+  @Test
+  void deleteBook_whenBorrowed_shouldThrowException() {
+    Mockito.when(borrowRepository.countByBookIdAndReturnDateIsNull(5L)).thenReturn(1);
 
-    Assertions.assertThat(editedBook.getId()).isEqualTo(2);
-    Assertions.assertThat(editedBook.getTitle()).isEqualTo("New Title");
-    Assertions.assertThat(editedBook.getAuthor()).isEqualTo("New Author");
-    Assertions.assertThat(editedBook.getAmount()).isEqualTo(5);
+    IllegalStateException exception = Assertions.assertThrows(IllegalStateException.class,
+        () -> bookService.deleteBook(5L));
+
+    Assertions.assertEquals("Cannot delete book with active borrows", exception.getMessage());
+  }
+
+  @Test
+  void deleteBook_whenNotBorrowed_shouldDelete() {
+    Mockito.when(borrowRepository.countByBookIdAndReturnDateIsNull(5L)).thenReturn(0);
+
+    bookService.deleteBook(5L);
+
+    Mockito.verify(bookRepository).deleteById(5L);
   }
 }
