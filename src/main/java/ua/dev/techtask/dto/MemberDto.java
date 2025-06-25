@@ -11,51 +11,32 @@ import ua.dev.techtask.entity.Member;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class MemberDto {
-    
-private long id;
-private String name;
-private LocalDateTime membershipDate;
 
-private List<Member> memberList;
-private Member member;
+  private long id;
+  private String name;
+  private LocalDateTime membershipDate;
 
-   public long getId(){
-        return this.id;
-    }
+  public long getId() {
+    return this.id;
+  }
 
-    public void setId(long id){
-        this.id = id;
-    }
+  public void setId(long id) {
+    this.id = id;
+  }
 
-    public String getName(){
-        return this.name;
-    }
+  public String getName() {
+    return this.name;
+  }
 
-    public void setName(String name){
-        this.name = name;
-    }
+  public void setName(String name) {
+    this.name = name;
+  }
 
-    public LocalDateTime getMembershipDate(){
-        return this.membershipDate;
-    }
+  public LocalDateTime getMembershipDate() {
+    return this.membershipDate;
+  }
 
-    public void setMembershipDate(LocalDateTime membershipDate){
-        this.membershipDate = membershipDate;
-    }
-
-    public List<Member> getMemberList(){
-        return this.memberList;
-    }
-
-    public void setMemberList(List<Member> memberList){
-        this.memberList = memberList;
-    }
-
-    public Member getMember(){
-        return this.member;
-    }
-
-    public void setMember(Member member){
-        this.member = member;
-    }
+  public void setMembershipDate(LocalDateTime membershipDate) {
+    this.membershipDate = membershipDate;
+  }
 }

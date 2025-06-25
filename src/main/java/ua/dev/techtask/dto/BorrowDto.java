@@ -9,7 +9,6 @@ public class BorrowDto {
 
   private Long memberId;
   private Long bookId;
-  private Long borrowId;
 
   public Long getMemberId() {
     return this.memberId;
@@ -25,13 +24,5 @@ public class BorrowDto {
 
   public void setBookId(Long bookId) {
     this.bookId = bookId;
-  }
-
-  public Long getBorrowId() {
-    return this.borrowId;
-  }
-
-  public void setBorrowId(Long borrowId) {
-    this.borrowId = borrowId;
   }
 }
