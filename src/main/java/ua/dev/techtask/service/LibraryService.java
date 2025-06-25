@@ -1,6 +1,7 @@
 package ua.dev.techtask.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
 import ua.dev.techtask.dto.BorrowDto;
+import ua.dev.techtask.dto.BorrowedBookStat;
 import ua.dev.techtask.entity.Book;
 import ua.dev.techtask.entity.Borrow;
 import ua.dev.techtask.entity.Member;
@@ -61,6 +63,33 @@ public class LibraryService {
     book.setAmount(book.getAmount() + 1);
     bookRepository.save(book);
     borrow.setReturnDate(LocalDateTime.now());
+  }
+
+  public List<Book> getAllBorrowedBooksByMemberName(String memberName) {
+    List<Book> bookList = borrowRepository.findBooksBorrowedByMemberName(memberName);
+    if (bookList != null) {
+      return bookList;
+    } else {
+      throw new RuntimeException("No borrowed books by " + memberName);
+    }
+  }
+
+  public List<String> findDistinctBorrowedBookTitles() {
+    List<String> bookTitles = borrowRepository.findDisctinctBorrowedBookTitles();
+    if (bookTitles != null) {
+      return bookTitles;
+    } else {
+      throw new RuntimeException("No borrowed books");
+    }
+  }
+
+  public List<BorrowedBookStat> findBorrowedBookStats() {
+    List<BorrowedBookStat> borrowedBookStats = borrowRepository.findBookBorrowStats();
+    if (borrowedBookStats != null) {
+      return borrowedBookStats;
+    } else {
+      throw new RuntimeException("Can't provide borrow statistics");
+    }
   }
 
 }
