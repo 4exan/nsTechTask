@@ -10,6 +10,11 @@ public class BorrowDto {
   private Long memberId;
   private Long bookId;
 
+  public BorrowDto(Long memberId, Long bookId) {
+    this.memberId = memberId;
+    this.bookId = bookId;
+  }
+
   public Long getMemberId() {
     return this.memberId;
   }
