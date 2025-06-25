@@ -38,9 +38,9 @@ public class EntityController {
     bookService.createBook(req);
   }
 
-  @PostMapping("/books/edit")
-  public void editBook(@RequestBody BookDto req) {
-    bookService.editBook(req);
+  @PostMapping("/books/edit/{bookId}")
+  public void editBook(@PathVariable long bookId, @RequestBody BookDto req) {
+    bookService.editBook(bookId, req);
   }
 
   @DeleteMapping("/books/{id}")
@@ -58,9 +58,9 @@ public class EntityController {
     memberService.createNewMember(req);
   }
 
-  @PostMapping("/members/edit")
-  public void editMember(@RequestBody MemberDto req) {
-    memberService.editMember(req);
+  @PostMapping("/members/edit/{memberId}")
+  public void editMember(@PathVariable Long memberId, @RequestBody MemberDto req) {
+    memberService.editMember(memberId, req);
   }
 
   @DeleteMapping("/members/{id}")
